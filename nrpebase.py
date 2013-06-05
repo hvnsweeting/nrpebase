@@ -3,27 +3,31 @@ import os
 import sys
 from jinja2 import Environment, FileSystemLoader
 
-TEMPLATE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
-
 if __name__ == "__main__":
     force = None
-    if len(sys.argv) >= 3:
+    if len(sys.argv) >= 4:
         dest = sys.argv[1]
         appname = sys.argv[2]
-    if len(sys.argv) == 4:
-        if sys.argv[3] == "-f":
-            force = sys.argv[3]
-    if len(sys.argv) not in (3, 4):
-        print "USAGE: nrpebase dir_path appname [-f]'"
+        cfg_type = sys.argv[3]
+        if cfg_type not in ('nrpe', 'diamond'):
+            sys.exit('cfg_type must be nrpe or diamond')
+    if len(sys.argv) == 5:
+        if sys.argv[4] == "-f":
+            force = sys.argv[4]
+    if len(sys.argv) not in (4, 5):
+        print "USAGE: {0} dir_path appname TYPE [-f]".format(__file__)
         sys.exit(1)
 
-    nrpe_dir = os.path.join(dest, 'nrpe')
+    TEMPLATE_DIR = os.path.abspath(os.path.join(
+                                   os.path.dirname(__file__), cfg_type))
+    nrpe_dir = os.path.join(dest, cfg_type)
     try:
         os.mkdir(nrpe_dir)
     except OSError as e:
         if not force:
-            print ("NRPE dir existed, use "
-                   "'nrpebase dir_path appname -f' to overwrite it")
+            print ("{0} dir existed, use "
+                   "'{1} dir_path appname TYPE -f' to overwrite it").format(
+                           cfg_type, __file__)
             sys.exit(1)
         else:
             pass
